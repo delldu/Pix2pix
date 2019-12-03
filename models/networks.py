@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.nn import init
 import functools
 from torch.optim import lr_scheduler
-
+import pdb
 
 ###############################################################################
 # Helper Functions
@@ -156,6 +156,17 @@ def define_G(input_nc, output_nc, ngf, netG, norm='batch', use_dropout=False, in
         net = UnetGenerator(input_nc, output_nc, 8, ngf, norm_layer=norm_layer, use_dropout=use_dropout)
     else:
         raise NotImplementedError('Generator model name [%s] is not recognized' % netG)
+    # pdb.set_trace()
+    # (Pdb) a
+    # input_nc = 1
+    # output_nc = 2
+    # ngf = 64
+    # netG = 'unet_256'
+    # norm = 'batch'
+    # use_dropout = True
+    # init_type = 'normal'
+    # init_gain = 0.02
+    # gpu_ids = [0]
     return init_net(net, init_type, init_gain, gpu_ids)
 
 
@@ -200,6 +211,17 @@ def define_D(input_nc, ndf, netD, n_layers_D=3, norm='batch', init_type='normal'
         net = PixelDiscriminator(input_nc, ndf, norm_layer=norm_layer)
     else:
         raise NotImplementedError('Discriminator model name [%s] is not recognized' % netD)
+    # pdb.set_trace()
+    # (Pdb) a
+    # input_nc = 3
+    # ndf = 64
+    # netD = 'basic'
+    # n_layers_D = 3
+    # norm = 'batch'
+    # init_type = 'normal'
+    # init_gain = 0.02
+    # gpu_ids = [0]
+
     return init_net(net, init_type, init_gain, gpu_ids)
 
 
@@ -577,15 +599,30 @@ class NLayerDiscriminator(nn.Module):
 
         sequence += [nn.Conv2d(ndf * nf_mult, 1, kernel_size=kw, stride=1, padding=padw)]  # output 1 channel prediction map
         self.model = nn.Sequential(*sequence)
+        # (Pdb) pp net
+        # NLayerDiscriminator(
+        #   (model): Sequential(
+        #     (0): Conv2d(3, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+        #     (1): LeakyReLU(negative_slope=0.2, inplace=True)
+        #     (2): Conv2d(64, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #     (3): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #     (4): LeakyReLU(negative_slope=0.2, inplace=True)
+        #     (5): Conv2d(128, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #     (6): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #     (7): LeakyReLU(negative_slope=0.2, inplace=True)
+        #     (8): Conv2d(256, 512, kernel_size=(4, 4), stride=(1, 1), padding=(1, 1), bias=False)
+        #     (9): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #     (10): LeakyReLU(negative_slope=0.2, inplace=True)
+        #     (11): Conv2d(512, 1, kernel_size=(4, 4), stride=(1, 1), padding=(1, 1))
+        #   )
+        # )
 
     def forward(self, input):
         """Standard forward."""
         return self.model(input)
 
-
 class PixelDiscriminator(nn.Module):
     """Defines a 1x1 PatchGAN discriminator (pixelGAN)"""
-
     def __init__(self, input_nc, ndf=64, norm_layer=nn.BatchNorm2d):
         """Construct a 1x1 PatchGAN discriminator
 

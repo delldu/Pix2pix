@@ -20,7 +20,7 @@ See our template model class 'template_model.py' for more details.
 
 import importlib
 from models.base_model import BaseModel
-
+import pdb
 
 def find_model_using_name(model_name):
     """Import the module "models/[model_name]_model.py".
@@ -41,7 +41,13 @@ def find_model_using_name(model_name):
     if model is None:
         print("In %s.py, there should be a subclass of BaseModel with class name that matches %s in lowercase." % (model_filename, target_model_name))
         exit(0)
-
+    # (Pdb) pp model_filename
+    # 'models.colorization_model'
+    # (Pdb) pp target_model_name
+    # 'colorizationmodel'
+    # pdb.set_trace()
+    # (Pdb) pp model
+    # <class 'models.colorization_model.ColorizationModel'>
     return model
 
 

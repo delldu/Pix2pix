@@ -5,7 +5,7 @@ from skimage import color  # require skimage
 from PIL import Image
 import numpy as np
 import torchvision.transforms as transforms
-
+import pdb
 
 class ColorizationDataset(BaseDataset):
     """This dataset class can load a set of natural images in RGB, and convert RGB format into (L, ab) pairs in Lab color space.
@@ -57,8 +57,10 @@ class ColorizationDataset(BaseDataset):
         im = Image.open(path).convert('RGB')
         im = self.transform(im)
         im = np.array(im)
-        lab = color.rgb2lab(im).astype(np.float32)
+        lab = color.rgb2lab(im).astype(np.float32)        
         lab_t = transforms.ToTensor()(lab)
+        # L -- [0, 100]
+        # A, B -- [-128, 127.0] ? 
         A = lab_t[[0], ...] / 50.0 - 1.0
         B = lab_t[[1, 2], ...] / 110.0
         return {'A': A, 'B': B, 'A_paths': path, 'B_paths': path}

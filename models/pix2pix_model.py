@@ -1,6 +1,7 @@
 import torch
 from .base_model import BaseModel
 from . import networks
+import pdb
 
 
 class Pix2PixModel(BaseModel):
@@ -85,14 +86,137 @@ class Pix2PixModel(BaseModel):
 
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
+        # (Pdb) pp self.netG
+        # DataParallel(
+        #   (module): UnetGenerator(
+        #     (model): UnetSkipConnectionBlock(
+        #       (model): Sequential(
+        #         (0): Conv2d(1, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #         (1): UnetSkipConnectionBlock(
+        #           (model): Sequential(
+        #             (0): LeakyReLU(negative_slope=0.2, inplace=True)
+        #             (1): Conv2d(64, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #             (2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #             (3): UnetSkipConnectionBlock(
+        #               (model): Sequential(
+        #                 (0): LeakyReLU(negative_slope=0.2, inplace=True)
+        #                 (1): Conv2d(128, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #                 (2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #                 (3): UnetSkipConnectionBlock(
+        #                   (model): Sequential(
+        #                     (0): LeakyReLU(negative_slope=0.2, inplace=True)
+        #                     (1): Conv2d(256, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #                     (2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #                     (3): UnetSkipConnectionBlock(
+        #                       (model): Sequential(
+        #                         (0): LeakyReLU(negative_slope=0.2, inplace=True)
+        #                         (1): Conv2d(512, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #                         (2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #                         (3): UnetSkipConnectionBlock(
+        #                           (model): Sequential(
+        #                             (0): LeakyReLU(negative_slope=0.2, inplace=True)
+        #                             (1): Conv2d(512, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #                             (2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #                             (3): UnetSkipConnectionBlock(
+        #                               (model): Sequential(
+        #                                 (0): LeakyReLU(negative_slope=0.2, inplace=True)
+        #                                 (1): Conv2d(512, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #                                 (2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #                                 (3): UnetSkipConnectionBlock(
+        #                                   (model): Sequential(
+        #                                     (0): LeakyReLU(negative_slope=0.2, inplace=True)
+        #                                     (1): Conv2d(512, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #                                     (2): ReLU(inplace=True)
+        #                                     (3): ConvTranspose2d(512, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #                                     (4): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #                                   )
+        #                                 )
+        #                                 (4): ReLU(inplace=True)
+        #                                 (5): ConvTranspose2d(1024, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #                                 (6): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #                                 (7): Dropout(p=0.5, inplace=False)
+        #                               )
+        #                             )
+        #                             (4): ReLU(inplace=True)
+        #                             (5): ConvTranspose2d(1024, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #                             (6): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #                             (7): Dropout(p=0.5, inplace=False)
+        #                           )
+        #                         )
+        #                         (4): ReLU(inplace=True)
+        #                         (5): ConvTranspose2d(1024, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #                         (6): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #                         (7): Dropout(p=0.5, inplace=False)
+        #                       )
+        #                     )
+        #                     (4): ReLU(inplace=True)
+        #                     (5): ConvTranspose2d(1024, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #                     (6): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #                   )
+        #                 )
+        #                 (4): ReLU(inplace=True)
+        #                 (5): ConvTranspose2d(512, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #                 (6): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #               )
+        #             )
+        #             (4): ReLU(inplace=True)
+        #             (5): ConvTranspose2d(256, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #             (6): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #           )
+        #         )
+        #         (2): ReLU(inplace=True)
+        #         (3): ConvTranspose2d(128, 2, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+        #         (4): Tanh()
+        #       )
+        #     )
+        #   )
+        # )
         self.fake_B = self.netG(self.real_A)  # G(A)
+        # pdb.set_trace()
+        # (Pdb) pp self.fake_B.size()
+        # torch.Size([10, 2, 256, 256])
 
     def backward_D(self):
         """Calculate GAN loss for the discriminator"""
+
+        # (Pdb) pp self.netD
+        # DataParallel(
+        #   (module): NLayerDiscriminator(
+        #     (model): Sequential(
+        #       (0): Conv2d(3, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+        #       (1): LeakyReLU(negative_slope=0.2, inplace=True)
+        #       (2): Conv2d(64, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #       (3): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #       (4): LeakyReLU(negative_slope=0.2, inplace=True)
+        #       (5): Conv2d(128, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #       (6): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #       (7): LeakyReLU(negative_slope=0.2, inplace=True)
+        #       (8): Conv2d(256, 512, kernel_size=(4, 4), stride=(1, 1), padding=(1, 1), bias=False)
+        #       (9): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #       (10): LeakyReLU(negative_slope=0.2, inplace=True)
+        #       (11): Conv2d(512, 1, kernel_size=(4, 4), stride=(1, 1), padding=(1, 1))
+        #     )
+        #   )
+        # )
+
+
+        self.set_requires_grad(self.netD, True)  # enable backprop for D
+        self.optimizer_D.zero_grad()     # set D's gradients to zero
+
         # Fake; stop backprop to the generator by detaching fake_B
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)  # we use conditional GANs; we need to feed both input and output to the discriminator
+        # (Pdb) fake_AB.size()
+        # torch.Size([10, 3, 256, 256])
         pred_fake = self.netD(fake_AB.detach())
+        # (Pdb) pred_fake.size()
+        # torch.Size([10, 1, 30, 30])
         self.loss_D_fake = self.criterionGAN(pred_fake, False)
+        # (Pdb) self.criterionGAN
+        # GANLoss(
+        #   (loss): BCEWithLogitsLoss()
+        # )
+        # (Pdb) self.loss_D_fake
+        # tensor(0.7503, device='cuda:0', grad_fn=<BinaryCrossEntropyWithLogitsBackward>)
         # Real
         real_AB = torch.cat((self.real_A, self.real_B), 1)
         pred_real = self.netD(real_AB)
@@ -101,27 +225,59 @@ class Pix2PixModel(BaseModel):
         self.loss_D = (self.loss_D_fake + self.loss_D_real) * 0.5
         self.loss_D.backward()
 
+        self.optimizer_D.step()          # update D's weights
+        # (Pdb) self.optimizer_D
+        # Adam (
+        # Parameter Group 0
+        #     amsgrad: False
+        #     betas: (0.5, 0.999)
+        #     eps: 1e-08
+        #     initial_lr: 0.0002
+        #     lr: 0.0002
+        #     weight_decay: 0
+        # )
+
     def backward_G(self):
         """Calculate GAN and L1 loss for the generator"""
+
+        self.set_requires_grad(self.netD, False)  # D requires no gradients when optimizing G
+        self.optimizer_G.zero_grad()        # set G's gradients to zero
+
         # First, G(A) should fake the discriminator
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)
         pred_fake = self.netD(fake_AB)
         self.loss_G_GAN = self.criterionGAN(pred_fake, True)
+        # (Pdb) pp pred_fake.size()
+        # torch.Size([10, 1, 30, 30])
+
         # Second, G(A) = B
         self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_L1
+        # (Pdb) pp self.opt.lambda_L1
+        # 100.0
+        # (Pdb) self.criterionL1
+        # L1Loss()
+        # (Pdb) self.loss_G_L1
+        # tensor(17.2437, device='cuda:0', grad_fn=<MulBackward0>)
+
         # combine loss and calculate gradients
         self.loss_G = self.loss_G_GAN + self.loss_G_L1
         self.loss_G.backward()
 
+        self.optimizer_G.step()             # udpate G's weights
+        # pdb.set_trace()
+
     def optimize_parameters(self):
         self.forward()                   # compute fake images: G(A)
         # update D
-        self.set_requires_grad(self.netD, True)  # enable backprop for D
-        self.optimizer_D.zero_grad()     # set D's gradients to zero
+        # # self.set_requires_grad(self.netD, True)  # enable backprop for D
+        # # self.optimizer_D.zero_grad()     # set D's gradients to zero
         self.backward_D()                # calculate gradients for D
-        self.optimizer_D.step()          # update D's weights
-        # update G
-        self.set_requires_grad(self.netD, False)  # D requires no gradients when optimizing G
-        self.optimizer_G.zero_grad()        # set G's gradients to zero
+        # # self.optimizer_D.step()          # update D's weights
+
+        # update G(Pdb) self.loss_G_L1
+        # tensor(17.2437, device='cuda:0', grad_fn=<MulBackward0>)
+
+        # # self.set_requires_grad(self.netD, False)  # D requires no gradients when optimizing G
+        # # self.optimizer_G.zero_grad()        # set G's gradients to zero
         self.backward_G()                   # calculate graidents for G
-        self.optimizer_G.step()             # udpate G's weights
+        # # self.optimizer_G.step()             # udpate G's weights
