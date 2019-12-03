@@ -44,22 +44,44 @@ class Pix2PixModel(BaseModel):
             opt (Option class)-- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
         BaseModel.__init__(self, opt)
-        # specify the training losses you want to print out. The training/test scripts will call <BaseModel.get_current_losses>
+        # pdb.set_trace()
+        # (Pdb) pp opt
+        # Namespace(batch_size=16, beta1=0.5, checkpoints_dir='./checkpoints', continue_train=False,
+        #     crop_size=256, dataroot='dataset', dataset_mode='colorization', direction='AtoB',
+        #     display_env='main', display_freq=400, display_id=1, display_ncols=4, display_port=8097,
+        #     display_server='http://localhost', display_winsize=256, epoch='1000', epoch_count=200,
+        #     gan_mode='vanilla', gpu_ids=[0], init_gain=0.02, init_type='normal', input_nc=1, isTrain=True,
+        #     lambda_L1=100.0, load_iter=0, load_size=286, lr=0.0002, lr_decay_iters=50, lr_policy='linear',
+        #     max_dataset_size=inf, model='colorization', n_layers_D=3, name='experiment_name', ndf=64,
+        #     netD='basic',
+        #     netG='unet_256', ngf=64, niter=500, niter_decay=500, no_dropout=False, no_flip=False, no_html=True,
+        #     norm='batch', num_threads=4, output_nc=2, phase='train', pool_size=0, preprocess='resize_and_crop',
+        #     print_freq=100, save_by_iter=False, save_epoch_freq=5, save_latest_freq=5000, serial_batches=False,
+        #     suffix='', update_html_freq=1000, verbose=False)
+
+        # specify the training losses you want to print out
+        # The training/test scripts will call <BaseModel.get_current_losses>
         self.loss_names = ['G_GAN', 'G_L1', 'D_real', 'D_fake']
-        # specify the images you want to save/display. The training/test scripts will call <BaseModel.get_current_visuals>
+        # specify the images you want to save/display.
+        # The training/test scripts will call <BaseModel.get_current_visuals>
         self.visual_names = ['real_A', 'fake_B', 'real_B']
-        # specify the models you want to save to the disk. The training/test scripts will call <BaseModel.save_networks> and <BaseModel.load_networks>
+        # specify the models you want to save to the disk.
+        # The training/test scripts will call <BaseModel.save_networks> and <BaseModel.load_networks>
         if self.isTrain:
             self.model_names = ['G', 'D']
         else:  # during test time, only load G
             self.model_names = ['G']
         # define networks (both generator and discriminator)
-        self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
-                                      not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
+        self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG,
+                                      opt.norm, not opt.no_dropout, opt.init_type,
+                                      opt.init_gain, self.gpu_ids)
 
-        if self.isTrain:  # define a discriminator; conditional GANs need to take both input and output images; Therefore, #channels for D is input_nc + output_nc
+        if self.isTrain:
+            # define a discriminator; conditional GANs need to take both input and output images;
+            # Therefore, channels for D is input_nc + output_nc
             self.netD = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
-                                          opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)
+                                          opt.n_layers_D, opt.norm, opt.init_type,
+                                          opt.init_gain, self.gpu_ids)
 
         if self.isTrain:
             # define loss functions

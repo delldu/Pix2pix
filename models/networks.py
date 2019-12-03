@@ -32,6 +32,12 @@ def get_norm_layer(norm_type='instance'):
         norm_layer = lambda x: Identity()
     else:
         raise NotImplementedError('normalization layer [%s] is not found' % norm_type)
+    # pdb.set_trace()
+    # (Pdb) pp norm_type,norm_layer
+    # ('batch',
+    #  functools.partial(<class 'torch.nn.modules.batchnorm.BatchNorm2d'>, 
+    #    affine=True, track_running_stats=True))
+
     return norm_layer
 
 
@@ -61,6 +67,9 @@ def get_scheduler(optimizer, opt):
         scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=opt.niter, eta_min=0)
     else:
         return NotImplementedError('learning rate policy [%s] is not implemented', opt.lr_policy)
+    # pdb.set_trace()
+    # (Pdb) opt.lr_policy
+    # 'linear'
     return scheduler
 
 
@@ -93,7 +102,9 @@ def init_weights(net, init_type='normal', init_gain=0.02):
         elif classname.find('BatchNorm2d') != -1:  # BatchNorm Layer's weight is not a matrix; only normal distribution applies.
             init.normal_(m.weight.data, 1.0, init_gain)
             init.constant_(m.bias.data, 0.0)
-
+    # pdb.set_trace()
+    # (Pdb) init_type
+    # 'normal'
     print('initialize network with %s' % init_type)
     net.apply(init_func)  # apply the initialization function <init_func>
 
@@ -145,7 +156,17 @@ def define_G(input_nc, output_nc, ngf, netG, norm='batch', use_dropout=False, in
     """
     net = None
     norm_layer = get_norm_layer(norm_type=norm)
-
+    # pdb.set_trace()
+    # (Pdb) a
+    # input_nc = 1
+    # output_nc = 2
+    # ngf = 64
+    # netG = 'unet_256'
+    # norm = 'batch'
+    # use_dropout = True
+    # init_type = 'normal'
+    # init_gain = 0.02
+    # gpu_ids = [0]
     if netG == 'resnet_9blocks':
         net = ResnetGenerator(input_nc, output_nc, ngf, norm_layer=norm_layer, use_dropout=use_dropout, n_blocks=9)
     elif netG == 'resnet_6blocks':
@@ -202,7 +223,16 @@ def define_D(input_nc, ndf, netD, n_layers_D=3, norm='batch', init_type='normal'
     """
     net = None
     norm_layer = get_norm_layer(norm_type=norm)
-
+    # pdb.set_trace()
+    # (Pdb) a
+    # input_nc = 3
+    # ndf = 64
+    # netD = 'basic'
+    # n_layers_D = 3
+    # norm = 'batch'
+    # init_type = 'normal'
+    # init_gain = 0.02
+    # gpu_ids = [0]
     if netD == 'basic':  # default PatchGAN classifier
         net = NLayerDiscriminator(input_nc, ndf, n_layers=3, norm_layer=norm_layer)
     elif netD == 'n_layers':  # more options
@@ -258,6 +288,8 @@ class GANLoss(nn.Module):
             self.loss = None
         else:
             raise NotImplementedError('gan mode %s not implemented' % gan_mode)
+        # pdb.set_trace()
+        # gan_mode == 'vanilla'
 
     def get_target_tensor(self, prediction, target_is_real):
         """Create label tensors with the same size as the input.
@@ -294,6 +326,9 @@ class GANLoss(nn.Module):
                 loss = -prediction.mean()
             else:
                 loss = prediction.mean()
+        # pdb.set_trace()
+        # (Pdb) self.gan_mode
+        # 'vanilla'
         return loss
 
 
@@ -373,7 +408,6 @@ class ResnetGenerator(nn.Module):
 
         mult = 2 ** n_downsampling
         for i in range(n_blocks):       # add ResNet blocks
-
             model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
 
         for i in range(n_downsampling):  # add upsampling layers
@@ -472,18 +506,64 @@ class UnetGenerator(nn.Module):
         It is a recursive process.
         """
         super(UnetGenerator, self).__init__()
+        # pdb.set_trace()
+        # (Pdb) a
+        # self = UnetGenerator()
+        # input_nc = 1
+        # output_nc = 2
+        # num_downs = 8
+        # ngf = 64
+        # norm_layer = functools.partial(<class 'torch.nn.modules.batchnorm.BatchNorm2d'>,
+        #  affine=True, track_running_stats=True)
+        # use_dropout = True
+
         # construct unet structure
-        unet_block = UnetSkipConnectionBlock(ngf * 8, ngf * 8, input_nc=None, submodule=None, norm_layer=norm_layer, innermost=True)  # add the innermost layer
+        unet_block = UnetSkipConnectionBlock(ngf * 8,
+                                             ngf * 8,
+                                             input_nc=None,
+                                             submodule=None,
+                                             norm_layer=norm_layer,
+                                             innermost=True)  # add the innermost layer
         for i in range(num_downs - 5):          # add intermediate layers with ngf * 8 filters
-            unet_block = UnetSkipConnectionBlock(ngf * 8, ngf * 8, input_nc=None, submodule=unet_block, norm_layer=norm_layer, use_dropout=use_dropout)
+            unet_block = UnetSkipConnectionBlock(ngf * 8,
+                                                 ngf * 8,
+                                                 input_nc=None,
+                                                 submodule=unet_block,
+                                                 norm_layer=norm_layer,
+                                                 use_dropout=use_dropout)
         # gradually reduce the number of filters from ngf * 8 to ngf
-        unet_block = UnetSkipConnectionBlock(ngf * 4, ngf * 8, input_nc=None, submodule=unet_block, norm_layer=norm_layer)
-        unet_block = UnetSkipConnectionBlock(ngf * 2, ngf * 4, input_nc=None, submodule=unet_block, norm_layer=norm_layer)
-        unet_block = UnetSkipConnectionBlock(ngf, ngf * 2, input_nc=None, submodule=unet_block, norm_layer=norm_layer)
-        self.model = UnetSkipConnectionBlock(output_nc, ngf, input_nc=input_nc, submodule=unet_block, outermost=True, norm_layer=norm_layer)  # add the outermost layer
+        unet_block = UnetSkipConnectionBlock(ngf * 4,
+                                             ngf * 8,
+                                             input_nc=None,
+                                             submodule=unet_block,
+                                             norm_layer=norm_layer)
+        unet_block = UnetSkipConnectionBlock(ngf * 2,
+                                             ngf * 4,
+                                             input_nc=None,
+                                             submodule=unet_block,
+                                             norm_layer=norm_layer)
+        unet_block = UnetSkipConnectionBlock(ngf,
+                                             ngf * 2,
+                                             input_nc=None,
+                                             submodule=unet_block,
+                                             norm_layer=norm_layer)
+        self.model = UnetSkipConnectionBlock(
+            output_nc,
+            ngf,
+            input_nc=input_nc,
+            submodule=unet_block,
+            outermost=True,
+            norm_layer=norm_layer)  # add the outermost layer
+        # pdb.set_trace()
 
     def forward(self, input):
         """Standard forward"""
+        # pdb.set_trace()
+        # (Pdb) input.size()
+        # torch.Size([10, 1, 256, 256])
+        # (Pdb) y=self.model(input)
+        # y.size()
+        # torch.Size([10, 2, 256, 256])
         return self.model(input)
 
 
@@ -508,11 +588,34 @@ class UnetSkipConnectionBlock(nn.Module):
             user_dropout (bool) -- if use dropout layers.
         """
         super(UnetSkipConnectionBlock, self).__init__()
+        # (Pdb) a
+        # self = UnetSkipConnectionBlock(
+        #   (model): Sequential(
+        #     (0): LeakyReLU(negative_slope=0.2, inplace=True)
+        #     (1): Conv2d(512, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #     (2): ReLU(inplace=True)
+        #     (3): ConvTranspose2d(512, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
+        #     (4): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        #   )
+        # )
+        # outer_nc = 512
+        # inner_nc = 512
+        # input_nc = 512
+        # submodule = None
+        # outermost = False
+        # innermost = True
+        # norm_layer = functools.partial(<class 'torch.nn.modules.batchnorm.BatchNorm2d'>,
+        #     affine=True, track_running_stats=True)
+        # use_dropout = False
+
         self.outermost = outermost
         if type(norm_layer) == functools.partial:
             use_bias = norm_layer.func == nn.InstanceNorm2d
         else:
             use_bias = norm_layer == nn.InstanceNorm2d
+
+        # (Pdb) pp use_bias
+        # False
         if input_nc is None:
             input_nc = outer_nc
         downconv = nn.Conv2d(input_nc, inner_nc, kernel_size=4,
@@ -530,12 +633,27 @@ class UnetSkipConnectionBlock(nn.Module):
             up = [uprelu, upconv, nn.Tanh()]
             model = down + [submodule] + up
         elif innermost:
+            # ===> ===> ====>
             upconv = nn.ConvTranspose2d(inner_nc, outer_nc,
                                         kernel_size=4, stride=2,
                                         padding=1, bias=use_bias)
             down = [downrelu, downconv]
             up = [uprelu, upconv, upnorm]
             model = down + up
+            # (Pdb) pp down
+            # [LeakyReLU(negative_slope=0.2, inplace=True),
+            #  Conv2d(512, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)]
+            # (Pdb) pp up
+            # [ReLU(inplace=True),
+            #  ConvTranspose2d(512, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False),
+            #  BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)]
+            # -----------------------------------------------------------------------------------------
+            # (Pdb) pp model
+            # [LeakyReLU(negative_slope=0.2, inplace=True),
+            #  Conv2d(512, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False),
+            #  ReLU(inplace=True),
+            #  ConvTranspose2d(512, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False),
+            #  BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)]
         else:
             upconv = nn.ConvTranspose2d(inner_nc * 2, outer_nc,
                                         kernel_size=4, stride=2,
@@ -550,11 +668,14 @@ class UnetSkipConnectionBlock(nn.Module):
 
         self.model = nn.Sequential(*model)
 
+        # pdb.set_trace()
+
     def forward(self, x):
         if self.outermost:
             return self.model(x)
         else:   # add skip connections
             return torch.cat([x, self.model(x)], 1)
+        pdb.set_trace()
 
 
 class NLayerDiscriminator(nn.Module):
@@ -575,57 +696,99 @@ class NLayerDiscriminator(nn.Module):
         else:
             use_bias = norm_layer == nn.InstanceNorm2d
 
-        kw = 4
-        padw = 1
-        sequence = [nn.Conv2d(input_nc, ndf, kernel_size=kw, stride=2, padding=padw), nn.LeakyReLU(0.2, True)]
+        sequence = [
+            nn.Conv2d(input_nc, ndf, kernel_size=4, stride=2, padding=1),
+            nn.LeakyReLU(0.2, True)
+        ]
         nf_mult = 1
         nf_mult_prev = 1
         for n in range(1, n_layers):  # gradually increase the number of filters
             nf_mult_prev = nf_mult
             nf_mult = min(2 ** n, 8)
             sequence += [
-                nn.Conv2d(ndf * nf_mult_prev, ndf * nf_mult, kernel_size=kw, stride=2, padding=padw, bias=use_bias),
+                nn.Conv2d(ndf * nf_mult_prev,
+                          ndf * nf_mult,
+                          kernel_size=4,
+                          stride=2,
+                          padding=1,
+                          bias=use_bias),
                 norm_layer(ndf * nf_mult),
                 nn.LeakyReLU(0.2, True)
             ]
+        # pdb.set_trace()
+        # (Pdb) a
+        # self = NLayerDiscriminator()
+        # input_nc = 3
+        # ndf = 64
+        # n_layers = 3
+        # norm_layer = functools.partial(<class
+        # 'torch.nn.modules.batchnorm.BatchNorm2d'>, affine=True, track_running_stats=True)
+        # (Pdb) pp sequence
+        # ------
+        # [Conv2d(3, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1)),
+        #  LeakyReLU(negative_slope=0.2, inplace=True),
+        # ---1
+        #  Conv2d(64, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False),
+        #  BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+        #  LeakyReLU(negative_slope=0.2, inplace=True),
+        # ---2
+        #  Conv2d(128, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False),
+        #  BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+        #  LeakyReLU(negative_slope=0.2, inplace=True)]
 
         nf_mult_prev = nf_mult
         nf_mult = min(2 ** n_layers, 8)
         sequence += [
-            nn.Conv2d(ndf * nf_mult_prev, ndf * nf_mult, kernel_size=kw, stride=1, padding=padw, bias=use_bias),
+            nn.Conv2d(ndf * nf_mult_prev,
+                      ndf * nf_mult,
+                      kernel_size=4,
+                      stride=1,
+                      padding=1,
+                      bias=use_bias),
             norm_layer(ndf * nf_mult),
             nn.LeakyReLU(0.2, True)
         ]
 
-        sequence += [nn.Conv2d(ndf * nf_mult, 1, kernel_size=kw, stride=1, padding=padw)]  # output 1 channel prediction map
+        sequence += [
+            nn.Conv2d(ndf * nf_mult, 1, kernel_size=4, stride=1, padding=1)
+        ]  # output 1 channel prediction map
         self.model = nn.Sequential(*sequence)
         # (Pdb) pp net
         # NLayerDiscriminator(
         #   (model): Sequential(
         #     (0): Conv2d(3, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
         #     (1): LeakyReLU(negative_slope=0.2, inplace=True)
+        #    -----------
         #     (2): Conv2d(64, 128, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
         #     (3): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
         #     (4): LeakyReLU(negative_slope=0.2, inplace=True)
         #     (5): Conv2d(128, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False)
         #     (6): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
         #     (7): LeakyReLU(negative_slope=0.2, inplace=True)
+        #     ---------
         #     (8): Conv2d(256, 512, kernel_size=(4, 4), stride=(1, 1), padding=(1, 1), bias=False)
         #     (9): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
         #     (10): LeakyReLU(negative_slope=0.2, inplace=True)
+        #    -------
         #     (11): Conv2d(512, 1, kernel_size=(4, 4), stride=(1, 1), padding=(1, 1))
         #   )
         # )
 
     def forward(self, input):
         """Standard forward."""
+        # pdb.set_trace()
+        # (Pdb) input.size()
+        # torch.Size([10, 3, 256, 256])
+        # (Pdb) self.model(input).size()
+        # torch.Size([10, 1, 30, 30])
         return self.model(input)
+
 
 class PixelDiscriminator(nn.Module):
     """Defines a 1x1 PatchGAN discriminator (pixelGAN)"""
+
     def __init__(self, input_nc, ndf=64, norm_layer=nn.BatchNorm2d):
         """Construct a 1x1 PatchGAN discriminator
-
         Parameters:
             input_nc (int)  -- the number of channels in input images
             ndf (int)       -- the number of filters in the last conv layer
@@ -646,7 +809,9 @@ class PixelDiscriminator(nn.Module):
             nn.Conv2d(ndf * 2, 1, kernel_size=1, stride=1, padding=0, bias=use_bias)]
 
         self.net = nn.Sequential(*self.net)
+        pdb.set_trace()
 
     def forward(self, input):
         """Standard forward."""
+        pdb.set_trace()
         return self.net(input)
